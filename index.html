@@ -95,7 +95,89 @@
                 flex-direction: row !important;
             }
             .product-spec {
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
+                display: flex;
+                align-items: center;
+                width: 100%;
+            }
+            .spec-group {
+                padding: 0.75rem;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .product-spec {
+                font-size: 0.95rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                width: 100%;
+            }
+            .controls-container {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                width: 100%;
+            }
+            .controls-row {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                width: 100%;
+            }
+            .quantity-controls {
+                flex: 2;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .unit-input {
+                flex: 1;
+                min-width: 80px;
+                height: 48px;
+                font-size: 1.1rem;
+            }
+            .input-number {
+                height: 48px;
+                font-size: 1.1rem;
+                padding: 0 0.5rem;
+                min-width: 100px;
+                width: 100%;
+            }
+            .quantity-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 1.5rem;
+                padding: 0;
+            }
+            .product-location {
+                font-size: 0.8rem;
+                color: #666;
+                padding: 0.25rem 0;
+            }
+            .action-container {
+                display: flex;
+                gap: 0.5rem;
+                align-items: center;
+                margin-top: 0.5rem;
+                width: 100%;
+            }
+            .note-input {
+                flex: 1;
+                height: 36px;
+                margin: 0;
+            }
+            .submit-btn {
+                width: auto;
+                min-width: 60px;
+                height: 36px;
+                padding: 0 1rem;
+                font-size: 0.9rem;
+            }
+            .product-code {
+                font-size: 0.85rem;
+                color: #6b7280;
+                margin-bottom: 0.25rem;
             }
         }
         
@@ -251,7 +333,7 @@
             font-size: 1.1rem;
             font-weight: 600;
             color: #1f2937;
-            margin-bottom: 0.25rem;
+            padding: 0.25rem 0;
         }
         
         .product-location {
@@ -260,15 +342,59 @@
             padding: 0.25rem 0.5rem;
             background-color: #f3f4f6;
             border-radius: 4px;
+            display: inline-block;
+            margin-left: auto;
         }
         
         .spec-group {
             border-bottom: 1px solid #e5e7eb;
-            padding: 0.75rem 0;
+            padding: 1rem;
+            margin: 0.5rem 0;
         }
         
-        .spec-group:last-child {
-            border-bottom: none;
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .input-number {
+            width: 60px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 4px;
+            height: 40px;
+        }
+
+        .quantity-btn {
+            font-size: 1.25rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f4f6;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .product-spec {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            padding: 0.25rem 0;
+        }
+
+        .product-location {
+            font-size: 0.875rem;
+            color: #6b7280;
+            padding: 0.25rem 0.5rem;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+            display: inline-block;
+            margin-left: auto;
         }
 
         .nav-container {
@@ -363,6 +489,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            margin-right: 0.5rem;
         }
 
         .quick-nav {
@@ -444,6 +571,66 @@
         
         .submit-btn.with-note:hover {
             background-color: #1976D2;
+        }
+
+        .spec-group {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .input-number {
+            width: 60px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 4px;
+            height: 40px;
+        }
+
+        .quantity-btn {
+            font-size: 1.25rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f4f6;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .product-spec {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            padding: 0.25rem 0;
+        }
+
+        .product-location {
+            font-size: 0.875rem;
+            color: #6b7280;
+            padding: 0.25rem 0.5rem;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+            display: inline-block;
+            margin-left: auto;
+        }
+
+        .note-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -544,7 +731,7 @@
             
             const SHEET_ID = '102GIGymYY1WHIIfX2pCk_zUFGwetUIBYObTGM0EvE8c';
             const API_KEY = 'AIzaSyA3h1OJw20eEpPvtAzFM4RH4xOvQyJ7iH4';
-            const range = 'A1:G10000';
+            const range = 'A1:G1000';
             const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
             
             try {
@@ -578,7 +765,7 @@
                             id: index.toString(),
                             name: name,
                             spec: spec,
-                            code: code,  // 添加code字段
+                            code: '',  // 初始值設為空字串
                             cost: row[4] || '',
                             location: location,
                             quantity: 0
@@ -941,7 +1128,7 @@
                     <div class="flex justify-between items-center ${needCollapse ? 'cursor-pointer' : ''}" 
                          ${needCollapse ? `onclick="toggleProductSpecs('${productNameId}')"` : ''}>
                         <div>
-                            <div class="text-sm text-gray-500 mb-1">${products[0].code || ''}</div>
+                            <div class="product-code">${products[0].code || ''}</div>
                             <div class="product-name">${productName}</div>
                         </div>
                         ${needCollapse ? `
@@ -955,45 +1142,50 @@
                     <div id="specs-${productNameId}" class="${needCollapse ? 'hidden' : ''}">
                         ${products.map(product => `
                             <div class="spec-group">
-                                <div class="flex justify-between items-center">
-                                    <div class="product-spec">${product.spec}</div>
-                                    <div class="quantity-container">
+                                <div class="product-spec">${product.spec}</div>
+                                <div class="controls-container">
+                                    <div class="controls-row">
                                         <div class="quantity-controls">
                                             <button class="quantity-btn" onclick="updateQuantity('${product.id}', -1)">-</button>
                                             <input type="number" class="input-number" value="${product.quantity}" 
                                                    onchange="setQuantity('${product.id}', this.value)" min="0">
                                             <button class="quantity-btn" onclick="updateQuantity('${product.id}', 1)">+</button>
                                         </div>
-                                        <div class="product-location">位置: ${product.location}</div>
+                                        <input type="text" class="input-number unit-input" value="" 
+                                               onchange="setProductCode('${product.id}', this.value)" 
+                                               placeholder="單位">
                                     </div>
+                                    <div class="product-location">位置: ${product.location}</div>
                                 </div>
                             </div>
                         `).join('')}
                         ${shouldShowRelated && relatedProducts.length > 0 ? `
-                            <div class="related-products mt-2 mb-0">
-                                <div class="related-title mb-2">相關商品</div>
+                            <div class="related-products">
+                                <div class="related-title">相關商品</div>
                                 ${relatedProducts.map(product => `
                                     <div class="spec-group">
-                                        <div class="flex justify-between items-center">
-                                            <div class="product-spec">${product.spec}</div>
-                                            <div class="quantity-container">
+                                        <div class="product-spec">${product.spec}</div>
+                                        <div class="controls-container">
+                                            <div class="controls-row">
                                                 <div class="quantity-controls">
                                                     <button class="quantity-btn" onclick="updateQuantity('${product.id}', -1)">-</button>
                                                     <input type="number" class="input-number" value="${product.quantity}" 
                                                            onchange="setQuantity('${product.id}', this.value)" min="0">
                                                     <button class="quantity-btn" onclick="updateQuantity('${product.id}', 1)">+</button>
                                                 </div>
-                                                <div class="product-location">位置: ${product.location}</div>
+                                                <input type="text" class="input-number unit-input" value="" 
+                                                       onchange="setProductCode('${product.id}', this.value)" 
+                                                       placeholder="單位">
                                             </div>
+                                            <div class="product-location">位置: ${product.location}</div>
                                         </div>
                                     </div>
                                 `).join('')}
                             </div>
                         ` : ''}
-                        <div class="flex justify-end mt-4 gap-2">
-                            <button class="submit-btn with-note" onclick="submitProductGroup('${productName}', true)">
-                                帶備註送出
-                            </button>
+                        <div class="action-container">
+                            <input type="text" class="note-input" placeholder="有備註請輸入" 
+                                   onchange="setProductNote('${productNameId}', this.value)">
                             <button class="submit-btn" onclick="submitProductGroup('${productName}')">採購</button>
                         </div>
                     </div>
@@ -1028,14 +1220,12 @@
                 return;
             }
 
-            let note = '';
-            if (withNote) {
-                note = prompt('請輸入備註：');
-                if (note === null) return; // 用戶取消
-            }
+            // 檢查是否有備註
+            const productNameId = `${products[0].location.split('-').slice(0, 2).join('-')}-${encodeURIComponent(productName)}`;
+            const noteInput = document.querySelector(`[data-product-id="${productNameId}"] .note-input`);
+            const note = noteInput ? noteInput.value : '';
 
-            // 準備上傳數據
-            const specQuantityText = products
+            let specQuantityText = products
                 .sort((a, b) => {
                     if (a.spec !== b.spec) {
                         return a.spec.localeCompare(b.spec, 'zh-TW');
@@ -1044,16 +1234,20 @@
                 })
                 .map(product => {
                     let specText = product.spec.trim();
-                    // 如果規格為空或為"無規格型號"，只回傳數量
+                    let codeText = product.code ? product.code.trim() : '';
+                    
+                    // 如果規格為空或為"無規格型號"，只回傳 數量 單位
                     if (!specText || specText === '無規格型號' || specText === '(無規格型號)' || /^\s*$/.test(specText)) {
-                        return `${product.quantity}`;
+                        return codeText ? `${product.quantity} ${codeText}` : `${product.quantity}`;
                     }
-                    // 如果規格只包含數字，直接使用數字
+                    
+                    // 如果規格只包含數字，使用 數量 單位 格式
                     if (/^\d+$/.test(specText)) {
-                        return `${product.quantity}`;
+                        return codeText ? `${product.quantity} ${codeText}` : `${product.quantity}`;
                     }
-                    // 其他情況使用 規格*數量 格式
-                    return `${specText}*${product.quantity}`;
+                    
+                    // 其他情況使用 規格*數量 單位 格式
+                    return codeText ? `${specText}*${product.quantity} ${codeText}` : `${specText}*${product.quantity}`;
                 })
                 .join('\n');
 
@@ -1167,6 +1361,14 @@
             }
         }
 
+        // 添加 setProductCode 函數
+        function setProductCode(productId, value) {
+            const product = productsData.find(p => p.id === productId);
+            if (product) {
+                product.code = value;
+            }
+        }
+
         // 搜索商品
         function searchProducts(query) {
             let searchResults = document.getElementById('searchResults');
@@ -1274,6 +1476,16 @@
 
         // 頁面加載時獲取數據
         loadSheetData();
+
+        function setProductNote(productNameId, value) {
+            const products = productsData.filter(p => {
+                const currentProductNameId = `${p.location.split('-').slice(0, 2).join('-')}-${encodeURIComponent(p.name)}`;
+                return currentProductNameId === productNameId;
+            });
+            products.forEach(product => {
+                product.note = value;
+            });
+        }
     </script>
 </body>
 </html> 
