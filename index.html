@@ -547,22 +547,25 @@
 
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
             background-color: #4CAF50;
             color: white;
-            padding: 16px;
-            border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             opacity: 0;
-            transform: translateX(100%);
-            transition: all 0.3s ease;
+            min-width: 200px;
+            max-width: 80%;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 9999;
         }
         
         .notification.show {
             opacity: 1;
-            transform: translateX(0);
+            transform: translateX(-50%) translateY(0);
         }
         
         .submit-btn.with-note {
