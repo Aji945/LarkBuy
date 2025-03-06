@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>庫存採購系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 16px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .input-number {
+            width: 80px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 4px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #1a73e8;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1557b0;
+        }
+        .status-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-left: 12px;
+        }
+        .status-connecting {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .search-box {
+            width: 100%;
+            max-width: 500px;
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .grid-cols-3-mobile {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-cols-3-mobile {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+            .flex-col {
+                flex-direction: row !important;
+            }
+            .product-spec {
+                flex-wrap: wrap;
+            }
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .small-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 8px;
+            margin: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        .small-card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .small-card h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .small-card p {
+            font-size: 0.8rem;
+            color: #666;
+            margin: 4px 0 0 0;
+        }
+        .section-divider {
+            border-top: 1px solid #e5e7eb;
+            margin: 0.75rem 0;
+            padding-top: 0.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+        
+        .related-products {
+            background-color: #f9fafb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .related-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #4b5563;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .card-group {
+            margin-bottom: 1rem;
+        }
+        
+        .card-group-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #4b5563;
+            margin: 1rem 0 0.5rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .bg-stripe-1 {
+            background-color: #f3f4f6;
+        }
+        
+        .bg-stripe-2 {
+            background-color: #fafbfc;
+        }
+        
+        .bg-stripe-3 {
+            background-color: #f0f9ff;
+        }
+        
+        .bg-stripe-4 {
+            background-color: #f5f3ff;
+        }
+        
+        .bg-stripe-5 {
+            background-color: #fdf2f8;
+        }
+
+        .fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            padding: 1rem;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .fixed-fab {
+            display: none;
+        }
+
+        .fixed-fab svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .content-padding {
+            padding-top: 1.5rem;
+        }
+
+        .quantity-btn {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f4f6;
+            border-radius: 8px;
+        }
+
+        .quantity-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .bg-stripe-even {
+            background-color: #f3f4f6;
+        }
+
+        .bg-stripe-odd {
+            background-color: #ffffff;
+        }
+
+        .product-name {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-spec {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+        
+        .product-location {
+            font-size: 0.875rem;
+            color: #6b7280;
+            padding: 0.25rem 0.5rem;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+        }
+        
+        .spec-group {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0.75rem 0;
+        }
+        
+        .spec-group:last-child {
+            border-bottom: none;
+        }
+
+        .nav-container {
+            display: flex;
+            flex-direction: column;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .nav-main {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            position: relative;
+        }
+
+        .nav-sub {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+
+        .nav-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .location-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #333;
+            margin-right: auto;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+
+        #main-sections, #sub-sections, #products-list {
+            margin-top: 4rem;
+        }
+
+        .product-name-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .quantity-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-nav {
+            display: flex;
+            gap: 0.5rem;
+            padding-right: 1rem;
+        }
+
+        .quick-nav-btn {
+            background: #f3f4f6;
+            color: #374151;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .quick-nav-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .section-divider:first-child {
+            margin-top: 0;
+            border-top: none;
+        }
+
+        .note-btn {
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            color: #6b7280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .note-btn:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        
+        .note-btn.has-note {
+            background: #4CAF50;
+            border-color: #45a049;
+            color: white;
+        }
+        
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 16px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            z-index: 9999;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .submit-btn.with-note {
+            background-color: #2196F3;
+        }
+        
+        .submit-btn.with-note:hover {
+            background-color: #1976D2;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- 固定頂部 -->
+        <div class="fixed-header">
+            <div class="container mx-auto">
+                <div class="nav-container">
+                    <div class="nav-main">
+                        <button class="nav-btn" onclick="goBack()">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 12H5M12 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <button class="nav-btn" onclick="showMainSections()">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            </svg>
+                        </button>
+                        <div id="header-location" class="location-title">庫存採購系統</div>
+                        <input type="text" id="searchInput" placeholder="搜尋商品..." oninput="searchProducts(this.value)">
+                    </div>
+                    <div class="nav-sub" id="quickNavContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-padding">
+            <!-- 主區域選擇 -->
+            <div id="main-sections" class="mb-8">
+                <div class="flex items-center mb-6">
+                    <h1 class="text-3xl font-bold">庫存採購系統</h1>
+                    <div id="connection-status" class="status-indicator status-connecting">
+                        正在連接數據庫...
+                    </div>
+                </div>
+                <div class="grid-cols-3-mobile" id="mainSectionsGrid">
+                </div>
+            </div>
+
+            <!-- 子區域選擇 -->
+            <div id="sub-sections" class="mb-8 hidden">
+                <h2 class="text-2xl font-bold mb-4"><span id="current-section"></span></h2>
+                <div class="grid-cols-3-mobile" id="subSectionsGrid">
+                </div>
+            </div>
+
+            <!-- 商品列表 -->
+            <div id="products-list" class="hidden">
+                <h2 class="text-2xl font-bold mb-4"><span id="current-location"></span>商品列表</h2>
+                <div id="products" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- 固定採購按鈕 -->
+        <button class="fixed-fab" onclick="submitOrder()" title="提交採購清單">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        let currentSection = '';
+        let currentSubSection = '';
+        let productsData = [];
+        let navigationHistory = [];
+
+        // 计算商品数量的全局函数
+        function getProductCount(section, sub = null) {
+            if (!productsData) return 0;
+            
+            if (sub) {
+                // 计算特定子区域的商品数量
+                return productsData.filter(p => {
+                    const parts = p.location.split('-');
+                    return parts[0] === section && parts[1] === sub;
+                }).length;
+            } else {
+                // 计算整个区域的商品数量（包括所有子区域）
+                return productsData.filter(p => 
+                    p.location.startsWith(section + '-') || p.location === section
+                ).length;
+            }
+        }
+
+        // 更新連接狀態
+        function updateConnectionStatus(status, message) {
+            const statusElement = document.getElementById('connection-status');
+            statusElement.className = 'status-indicator status-' + status;
+            statusElement.textContent = message;
+        }
+
+        // 從Google Sheets加載數據
+        async function loadSheetData() {
+            updateConnectionStatus('connecting', '正在連接數據庫...');
+            
+            const SHEET_ID = '102GIGymYY1WHIIfX2pCk_zUFGwetUIBYObTGM0EvE8c';
+            const API_KEY = 'AIzaSyA3h1OJw20eEpPvtAzFM4RH4xOvQyJ7iH4';
+            const range = 'A1:G10000';
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Response error:', errorText);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const rows = data.values;
+                if (!rows || rows.length === 0) {
+                    throw new Error('No data found.');
+                }
+                
+                // 轉換數據格式並去重
+                const uniqueProducts = new Map();
+                rows.slice(1).forEach((row, index) => {
+                    if (!row[2] || !row[6]) return; // 跳過空行
+                    
+                    const name = row[2].trim();
+                    const spec = (row[3] || '').trim();
+                    const location = (row[6] || '').trim();
+                    const code = (row[1] || '').trim();  // 添加B欄位
+                    
+                    const key = `${name}-${spec}`; // 用名稱+規格作為唯一鍵
+                    
+                    if (!uniqueProducts.has(key) && location) {
+                        uniqueProducts.set(key, {
+                            id: index.toString(),
+                            name: name,
+                            spec: spec,
+                            code: code,  // 添加code字段
+                            cost: row[4] || '',
+                            location: location,
+                            quantity: 0
+                        });
+                    }
+                });
+
+                productsData = Array.from(uniqueProducts.values());
+                
+                // 獲取所有獨特的區域和子區域
+                const sections = new Map();
+                productsData.forEach(p => {
+                    const location = p.location;
+                    if (!location) return;
+                    
+                    const parts = location.split('-');
+                    const mainSection = parts[0];
+                    
+                    if (!sections.has(mainSection)) {
+                        sections.set(mainSection, new Set());
+                    }
+                    
+                    if (parts.length > 1) {
+                        sections.get(mainSection).add(parts[1]);
+                    }
+                });
+
+                // 修改生成主區域HTML的部分
+                const mainSectionsHtml = Array.from(sections.keys())
+                    .sort()
+                    .map(section => {
+                        // 計算該區域所有商品的名稱數量（不重複）
+                        const allProducts = productsData.filter(p => 
+                            p.location === section || p.location.startsWith(section + '-')
+                        );
+                        const uniqueProductNames = new Set(allProducts.map(p => p.name));
+                        const totalProducts = uniqueProductNames.size;
+                            
+                        return `
+                            <div class="small-card" onclick="showSubSections('${section}')">
+                                <h2>${section}</h2>
+                                <p>${totalProducts} 個商品</p>
+                            </div>
+                        `;
+                    }).join('');
+                
+                document.getElementById('mainSectionsGrid').innerHTML = mainSectionsHtml;
+                window.sectionStructure = sections;
+                
+                updateConnectionStatus('success', `已連接資料庫`);
+                
+            } catch (error) {
+                console.error('Error loading sheet data:', error);
+                updateConnectionStatus('error', '連接失敗: ' + error.message);
+            }
+        }
+
+        // 導航相關函數
+        function goBack() {
+            if (navigationHistory.length > 0) {
+                const lastState = navigationHistory.pop();
+                if (lastState.type === 'main') {
+                    showMainSections();
+                } else if (lastState.type === 'sub') {
+                    showSubSections(lastState.section);
+                } else {
+                    showProducts(lastState.section, lastState.isDirectSection);
+                }
+            } else {
+                showMainSections();
+            }
+        }
+
+        function goHome() {
+            navigationHistory = [];
+            showMainSections();
+        }
+
+        function showMainSections() {
+            document.getElementById('main-sections').classList.remove('hidden');
+            document.getElementById('sub-sections').classList.add('hidden');
+            document.getElementById('products-list').classList.add('hidden');
+            currentSection = '';
+            currentSubSection = '';
+            updateHeaderLocation('庫存採購系統');
+        }
+
+        function showSubSections(section) {
+            navigationHistory.push({ type: 'main' });
+            currentSection = section;
+            updateHeaderLocation(section);
+            document.getElementById('current-section').textContent = section;
+            
+            // 獲取該區域的所有商品
+            const directProducts = productsData.filter(p => p.location === section);
+            const subSectionProducts = productsData.filter(p => p.location.startsWith(section + '-'));
+            
+            // 如果只有直接商品，沒有子區域，則直接顯示商品列表
+            if (directProducts.length > 0 && subSectionProducts.length === 0) {
+                showProducts(section, true);
+                return;
+            }
+            
+            // 獲取子區域
+            const subSections = new Set(
+                subSectionProducts.map(p => p.location.split('-')[1])
+            );
+            
+            let html = '';
+            
+            // 如果有直接商品，顯示一個特殊的卡片
+            if (directProducts.length > 0) {
+                const uniqueProductNames = new Set(directProducts.map(p => p.name));
+                html += `
+                    <div class="small-card" onclick="showProducts('${section}', true)">
+                        <h2>主區域</h2>
+                        <p>${uniqueProductNames.size} 個商品</p>
+                    </div>
+                `;
+            }
+            
+            // 顯示子區域（按數字和文字排序）
+            html += Array.from(subSections)
+                .sort((a, b) => {
+                    const aIsNum = /^\d+$/.test(a);
+                    const bIsNum = /^\d+$/.test(b);
+                    if (aIsNum && bIsNum) return parseInt(a) - parseInt(b);
+                    if (aIsNum) return -1;
+                    if (bIsNum) return 1;
+                    return a.localeCompare(b, 'zh-TW');
+                })
+                .map(sub => {
+                    const subProducts = productsData.filter(p => 
+                        p.location === `${section}-${sub}` || 
+                        p.location.startsWith(`${section}-${sub}-`)
+                    );
+                    const uniqueProductNames = new Set(subProducts.map(p => p.name));
+                    
+                    return `
+                        <div class="small-card" onclick="showProducts('${sub}')">
+                            <h2>${sub}</h2>
+                            <p>${uniqueProductNames.size} 個商品</p>
+                        </div>
+                    `;
+                }).join('');
+            
+            document.getElementById('subSectionsGrid').innerHTML = html;
+            document.getElementById('main-sections').classList.add('hidden');
+            document.getElementById('sub-sections').classList.remove('hidden');
+            document.getElementById('products-list').classList.add('hidden');
+        }
+
+        function showProducts(section, isDirectSection = false) {
+            navigationHistory.push({ 
+                type: isDirectSection ? 'main' : 'sub', 
+                section: currentSection,
+                isDirectSection
+            });
+
+            const location = isDirectSection ? section : `${currentSection}-${section}`;
+            currentSubSection = section;
+            updateHeaderLocation(location);
+            
+            // 获取当前位置的所有商品
+            let currentProducts = productsData.filter(p => {
+                if (isDirectSection) {
+                    // 如果是直接區域，顯示該區域的直接商品
+                    return p.location === section;
+                } else {
+                    // 如果是子區域，顯示該子區域的直接商品和其下級商品
+                    const fullLocation = `${currentSection}-${section}`;
+                    return p.location === fullLocation || p.location.startsWith(fullLocation + '-');
+                }
+            });
+            
+            if (currentProducts.length === 0) {
+                document.getElementById('products').innerHTML = '<div class="text-center text-gray-500 mt-4">無商品資料</div>';
+                document.getElementById('main-sections').classList.add('hidden');
+                document.getElementById('sub-sections').classList.add('hidden');
+                document.getElementById('products-list').classList.remove('hidden');
+                return;
+            }
+            
+            // 按子區域分組
+            const subLocationProducts = new Map();
+            currentProducts.forEach(product => {
+                const parts = product.location.split('-');
+                const currentLevel = isDirectSection ? 1 : 2;
+                let subLoc = '主區域';
+                
+                if (parts.length > currentLevel) {
+                    subLoc = parts.slice(currentLevel).join('-');
+                }
+                
+                if (!subLocationProducts.has(subLoc)) {
+                    subLocationProducts.set(subLoc, new Map());
+                }
+                
+                const subLocGroup = subLocationProducts.get(subLoc);
+                if (!subLocGroup.has(product.name)) {
+                    subLocGroup.set(product.name, []);
+                }
+                subLocGroup.get(product.name).push(product);
+            });
+            
+            // 更新快捷導航
+            const quickNavContainer = document.getElementById('quickNavContainer');
+            quickNavContainer.innerHTML = '';
+            const subLocations = Array.from(subLocationProducts.keys())
+                .filter(loc => loc !== '主區域')
+                .sort((a, b) => {
+                    const aIsNum = /^\d+$/.test(a);
+                    const bIsNum = /^\d+$/.test(b);
+                    if (aIsNum && bIsNum) return parseInt(a) - parseInt(b);
+                    if (aIsNum) return -1;
+                    if (bIsNum) return 1;
+                    return a.localeCompare(b, 'zh-TW');
+                });
+            
+            if (subLocations.length > 0) {
+                const quickNav = document.createElement('div');
+                quickNav.className = 'quick-nav';
+                
+                subLocations.forEach(subLoc => {
+                    const btn = document.createElement('button');
+                    btn.className = 'quick-nav-btn';
+                    btn.textContent = subLoc;
+                    btn.onclick = () => {
+                        const element = document.getElementById(`section-${subLoc}`);
+                        if (element) {
+                            const headerOffset = 120;
+                            const elementPosition = element.getBoundingClientRect().top;
+                            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                            
+                            window.scrollTo({
+                                top: offsetPosition,
+                                behavior: "smooth"
+                            });
+                        }
+                    };
+                    quickNav.appendChild(btn);
+                });
+                
+                quickNavContainer.appendChild(quickNav);
+            }
+            
+            // 生成HTML
+            let productsHtml = '';
+            
+            // 先顯示主區域的商品
+            if (subLocationProducts.has('主區域')) {
+                const mainProducts = subLocationProducts.get('主區域');
+                productsHtml += `
+                    <div class="section-divider">
+                        <div class="section-title">主區域</div>
+                        ${Array.from(mainProducts.entries())
+                            .sort((a, b) => a[0].localeCompare(b[0], 'zh-TW'))
+                            .map(([name, products], index) => 
+                                generateProductGroupCard(name, products, index % 2 === 0 ? 'bg-stripe-even' : 'bg-stripe-odd', new Set())
+                            ).join('')}
+                    </div>
+                `;
+            }
+            
+            // 然後顯示子區域的商品（按數字和文字排序）
+            subLocations.forEach(subLoc => {
+                const subProducts = subLocationProducts.get(subLoc);
+                productsHtml += `
+                    <div class="section-divider">
+                        <div class="section-title" id="section-${subLoc}">${subLoc}</div>
+                        ${Array.from(subProducts.entries())
+                            .sort((a, b) => a[0].localeCompare(b[0], 'zh-TW'))
+                            .map(([name, products], index) => 
+                                generateProductGroupCard(name, products, index % 2 === 0 ? 'bg-stripe-even' : 'bg-stripe-odd', new Set())
+                            ).join('')}
+                    </div>
+                `;
+            });
+            
+            document.getElementById('products').innerHTML = productsHtml;
+            document.getElementById('main-sections').classList.add('hidden');
+            document.getElementById('sub-sections').classList.add('hidden');
+            document.getElementById('products-list').classList.remove('hidden');
+        }
+
+        // 生成快捷導航按鈕
+        function generateQuickNavButtons(location) {
+            const parts = location.split('-');
+            if (parts.length < 2) return null;
+
+            const prefix = parts.slice(0, 2).join('-');
+            const subLocations = productsData
+                .filter(p => p.location.startsWith(prefix + '-'))
+                .map(p => p.location.split('-')[2])
+                .filter((value, index, self) => value && self.indexOf(value) === index)
+                .sort((a, b) => parseInt(a) - parseInt(b));
+
+            if (subLocations.length === 0) return null;
+
+            const quickNav = document.createElement('div');
+            quickNav.className = 'quick-nav';
+            
+            subLocations.forEach(subLoc => {
+                const btn = document.createElement('button');
+                btn.className = 'quick-nav-btn';
+                btn.textContent = subLoc;
+                btn.onclick = () => scrollToSubLocation(prefix + '-' + subLoc);
+                quickNav.appendChild(btn);
+            });
+
+            return quickNav;
+        }
+
+        // 滾動到指定位置
+        function scrollToSubLocation(targetLocation) {
+            const sectionTitles = document.querySelectorAll('.section-title');
+            let targetElement = null;
+            
+            for (const title of sectionTitles) {
+                if (title.textContent === targetLocation.split('-')[2]) {
+                    targetElement = title;
+                    break;
+                }
+            }
+            
+            if (targetElement) {
+                const headerOffset = 100;
+                const elementPosition = targetElement.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: "smooth"
+                });
+            }
+        }
+
+        // 修改商品組卡片生成函數
+        function generateProductGroupCard(productName, products, bgClass = '', shownRelatedProducts = new Set()) {
+            // 按規格排序商品
+            products.sort((a, b) => a.spec.localeCompare(b.spec, 'zh-TW'));
+            
+            // 获取当前商品组的位置前缀
+            const locationPrefix = products[0].location.split('-').slice(0, 2).join('-');
+            
+            // 只在商品首次出现在当前位置时显示相关商品
+            const shouldShowRelated = !shownRelatedProducts.has(locationPrefix + '-' + productName);
+            const currentPageProducts = new Set(products.map(p => p.location));
+            const relatedProducts = shouldShowRelated ? productsData.filter(p => 
+                p.name === productName && 
+                !currentPageProducts.has(p.location)
+            ).sort((a, b) => a.spec.localeCompare(b.spec, 'zh-TW')) : [];
+
+            // 判断是否需要折叠（只有当商品有多个规格或有相关商品时才需要）
+            const needCollapse = products.length > 1 || relatedProducts.length > 0;
+            const productNameId = `${locationPrefix}-${encodeURIComponent(productName)}`;
+
+            return `
+                <div class="card ${bgClass}" data-product-id="${productNameId}">
+                    <div class="flex justify-between items-center ${needCollapse ? 'cursor-pointer' : ''}" 
+                         ${needCollapse ? `onclick="toggleProductSpecs('${productNameId}')"` : ''}>
+                        <div>
+                            <div class="text-sm text-gray-500 mb-1">${products[0].code || ''}</div>
+                            <div class="product-name">${productName}</div>
+                        </div>
+                        ${needCollapse ? `
+                            <div class="text-gray-500">
+                                <svg id="arrow-${productNameId}" class="w-6 h-6 transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div id="specs-${productNameId}" class="${needCollapse ? 'hidden' : ''}">
+                        ${products.map(product => `
+                            <div class="spec-group">
+                                <div class="flex justify-between items-center">
+                                    <div class="product-spec">${product.spec}</div>
+                                    <div class="quantity-container">
+                                        <div class="quantity-controls">
+                                            <button class="quantity-btn" onclick="updateQuantity('${product.id}', -1)">-</button>
+                                            <input type="number" class="input-number" value="${product.quantity}" 
+                                                   onchange="setQuantity('${product.id}', this.value)" min="0">
+                                            <button class="quantity-btn" onclick="updateQuantity('${product.id}', 1)">+</button>
+                                        </div>
+                                        <div class="product-location">位置: ${product.location}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                        ${shouldShowRelated && relatedProducts.length > 0 ? `
+                            <div class="related-products mt-2 mb-0">
+                                <div class="related-title mb-2">相關商品</div>
+                                ${relatedProducts.map(product => `
+                                    <div class="spec-group">
+                                        <div class="flex justify-between items-center">
+                                            <div class="product-spec">${product.spec}</div>
+                                            <div class="quantity-container">
+                                                <div class="quantity-controls">
+                                                    <button class="quantity-btn" onclick="updateQuantity('${product.id}', -1)">-</button>
+                                                    <input type="number" class="input-number" value="${product.quantity}" 
+                                                           onchange="setQuantity('${product.id}', this.value)" min="0">
+                                                    <button class="quantity-btn" onclick="updateQuantity('${product.id}', 1)">+</button>
+                                                </div>
+                                                <div class="product-location">位置: ${product.location}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="flex justify-end mt-4 gap-2">
+                            <button class="submit-btn with-note" onclick="submitProductGroup('${productName}', true)">
+                                帶備註送出
+                            </button>
+                            <button class="submit-btn" onclick="submitProductGroup('${productName}')">採購</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 修改切換商品規格顯示的函數
+        function toggleProductSpecs(productNameId) {
+            const specsDiv = document.getElementById(`specs-${productNameId}`);
+            const arrow = document.getElementById(`arrow-${productNameId}`);
+            
+            if (!specsDiv || !arrow) {
+                console.error('找不到對應的元素:', productNameId);
+                return;
+            }
+            
+            if (specsDiv.classList.contains('hidden')) {
+                specsDiv.classList.remove('hidden');
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                specsDiv.classList.add('hidden');
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // 提交整個商品組
+        async function submitProductGroup(productName, withNote = false) {
+            const products = productsData.filter(p => p.name === productName && p.quantity > 0);
+            if (products.length === 0) {
+                alert('請先選擇採購數量！');
+                return;
+            }
+
+            let note = '';
+            if (withNote) {
+                note = prompt('請輸入備註：');
+                if (note === null) return; // 用戶取消
+            }
+
+            // 準備上傳數據
+            const specQuantityText = products
+                .sort((a, b) => {
+                    if (a.spec !== b.spec) {
+                        return a.spec.localeCompare(b.spec, 'zh-TW');
+                    }
+                    return b.quantity - a.quantity;
+                })
+                .map(product => {
+                    let specText = product.spec.trim();
+                    // 如果規格為空或為"無規格型號"，只回傳數量
+                    if (!specText || specText === '無規格型號' || specText === '(無規格型號)' || /^\s*$/.test(specText)) {
+                        return `${product.quantity}`;
+                    }
+                    // 如果規格只包含數字，直接使用數字
+                    if (/^\d+$/.test(specText)) {
+                        return `${product.quantity}`;
+                    }
+                    // 其他情況使用 規格*數量 格式
+                    return `${specText}*${product.quantity}`;
+                })
+                .join('\n');
+
+            try {
+                const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWmsOGnwWtjZkk8sxhcIQCeBhyCZdG1ZgUUAMTskquHF9971qTdgM79ODtMUDKFEIZ/exec';
+
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = APPS_SCRIPT_URL;
+                form.target = 'hidden_iframe';
+                form.style.display = 'none';
+
+                const addField = (name, value) => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = name;
+                    input.value = value;
+                    form.appendChild(input);
+                };
+
+                addField('productName', productName);
+                addField('specQuantityText', specQuantityText);
+                addField('note', note);
+
+                const iframe = document.createElement('iframe');
+                iframe.name = 'hidden_iframe';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+
+                // 創建提示元素
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = '採購單已送出！';
+                document.body.appendChild(notification);
+
+                window.addEventListener('message', function(event) {
+                    if (event.data === 'success') {
+                        products.forEach(product => {
+                            product.quantity = 0;
+                            const input = document.querySelector(`input[onchange="setQuantity('${product.id}', this.value)"]`);
+                            if (input) {
+                                input.value = 0;
+                            }
+                        });
+                        
+                        // 顯示提示
+                        notification.classList.add('show');
+                        
+                        // 3秒後移除提示
+                        setTimeout(() => {
+                            notification.classList.remove('show');
+                            setTimeout(() => {
+                                document.body.removeChild(notification);
+                            }, 300);
+                        }, 3000);
+                        
+                        setTimeout(() => {
+                            document.body.removeChild(iframe);
+                        }, 1000);
+                    }
+                }, false);
+
+                document.body.appendChild(form);
+                form.submit();
+                document.body.removeChild(form);
+
+            } catch (error) {
+                console.error('Error submitting order:', error);
+                alert('採購單送出失敗，請稍後再試！');
+            }
+        }
+
+        // 新增備註功能
+        function addNote(productName) {
+            const currentNote = localStorage.getItem(`note-${productName}`) || '';
+            const note = prompt('請輸入備註：', currentNote);
+            if (note !== null) {
+                localStorage.setItem(`note-${productName}`, note);
+                // 更新備註按鈕顯示
+                const noteBtn = document.querySelector(`button[data-note-btn="${productName}"]`);
+                if (noteBtn) {
+                    noteBtn.classList.toggle('has-note', note !== '');
+                    noteBtn.title = note ? `當前備註: ${note}` : '新增備註';
+                }
+            }
+        }
+
+        // 更新商品數量
+        function updateQuantity(productId, delta) {
+            const product = productsData.find(p => p.id === productId);
+            if (product) {
+                product.quantity = Math.max(0, product.quantity + delta);
+                // 不重新加載頁面，只更新數量
+                const input = document.querySelector(`input[onchange="setQuantity('${productId}', this.value)"]`);
+                if (input) {
+                    input.value = product.quantity;
+                }
+            }
+        }
+
+        // 設置商品數量
+        function setQuantity(productId, value) {
+            const product = productsData.find(p => p.id === productId);
+            if (product) {
+                product.quantity = Math.max(0, parseInt(value) || 0);
+                // 不重新加載頁面，只更新數量
+                const input = document.querySelector(`input[onchange="setQuantity('${productId}', this.value)"]`);
+                if (input) {
+                    input.value = product.quantity;
+                }
+            }
+        }
+
+        // 搜索商品
+        function searchProducts(query) {
+            let searchResults = document.getElementById('searchResults');
+            const navMain = document.querySelector('.nav-main');
+            
+            // 如果搜索结果容器不存在，创建一个新的
+            if (!searchResults) {
+                searchResults = document.createElement('div');
+                searchResults.id = 'searchResults';
+                searchResults.className = 'search-results hidden';
+                navMain.appendChild(searchResults);
+            }
+            
+            // 如果搜索框为空，隐藏结果
+            if (!query || !query.trim()) {
+                searchResults.classList.add('hidden');
+                return;
+            }
+
+            const results = productsData.filter(p => 
+                p.name.toLowerCase().includes(query.toLowerCase()) ||
+                p.spec.toLowerCase().includes(query.toLowerCase())
+            );
+
+            if (results.length > 0) {
+                const resultsHtml = results.map(product => `
+                    <div class="p-3 hover:bg-gray-100 cursor-pointer border-b" 
+                         onclick="navigateToProduct(\`${product.location}\`, \`${product.name.replace(/['"\\]/g, '\\$&')}\`, \`${product.spec.replace(/['"\\]/g, '\\$&')}\`)">
+                        <div class="font-medium">${product.name}</div>
+                        <div class="text-sm text-gray-600">${product.spec}</div>
+                        <div class="text-xs text-gray-500">位置: ${product.location}</div>
+                    </div>
+                `).join('');
+                
+                searchResults.innerHTML = resultsHtml;
+                searchResults.classList.remove('hidden');
+            } else {
+                searchResults.innerHTML = '<div class="p-3 text-gray-500">無搜尋結果</div>';
+                searchResults.classList.remove('hidden');
+            }
+
+            // 点击搜索框外部时隐藏搜索结果
+            document.addEventListener('click', function(event) {
+                if (!navMain.contains(event.target)) {
+                    searchResults.classList.add('hidden');
+                }
+            });
+        }
+
+        // 導航到特定商品
+        function navigateToProduct(location, productName, productSpec) {
+            const parts = location.split('-');
+            
+            // 重置導航歷史
+            navigationHistory = [];
+            
+            if (parts.length === 1) {
+                // 單層位置（如：熱銷區）
+                showProducts(parts[0], true);
+            } else if (parts.length >= 2) {
+                // 兩層或更多層位置（如：B-3 或 A-4-1）
+                currentSection = parts[0];
+                showProducts(parts[1], false);
+            }
+
+            // 等待DOM更新後滾動到商品位置
+            setTimeout(() => {
+                const productNameId = `${location.split('-').slice(0, 2).join('-')}-${encodeURIComponent(productName)}`;
+                const productCard = document.querySelector(`[data-product-id="${productNameId}"]`);
+                const specsDiv = document.getElementById(`specs-${productNameId}`);
+                const arrow = document.getElementById(`arrow-${productNameId}`);
+                
+                if (productCard && specsDiv && arrow) {
+                    // 展開商品規格
+                    specsDiv.classList.remove('hidden');
+                    arrow.style.transform = 'rotate(180deg)';
+                    
+                    // 滾動到商品標題位置
+                    const headerOffset = 120; // 考慮頂部導航欄高度
+                    const elementPosition = productCard.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: "smooth"
+                    });
+                }
+            }, 300);
+            
+            // 清除搜索状态
+            const searchResults = document.getElementById('searchResults');
+            if (searchResults) {
+                searchResults.classList.add('hidden');
+            }
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+        }
+
+        // 更新頂部標題
+        function updateHeaderLocation(text) {
+            document.getElementById('header-location').textContent = text;
+        }
+
+        // 頁面加載時獲取數據
+        loadSheetData();
+    </script>
+</body>
+</html> 
