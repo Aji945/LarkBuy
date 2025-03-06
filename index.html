@@ -4,82 +4,317 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>庫存採購系統</title>
+    <title>LONGHO內部採購</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        :root {
+            /* Apple 系统颜色 */
+            --apple-blue: rgb(0, 122, 255);
+            --apple-green: rgb(52, 199, 89);
+            --apple-indigo: rgb(88, 86, 214);
+            --apple-orange: rgb(255, 149, 0);
+            --apple-pink: rgb(255, 45, 85);
+            --apple-purple: rgb(175, 82, 222);
+            --apple-red: rgb(255, 59, 48);
+            --apple-teal: rgb(90, 200, 250);
+            --apple-yellow: rgb(255, 204, 0);
+            --apple-gray1: rgb(142, 142, 147);
+            --apple-gray2: rgb(174, 174, 178);
+            --apple-gray3: rgb(199, 199, 204);
+            --apple-gray4: rgb(209, 209, 214);
+            --apple-gray5: rgb(229, 229, 234);
+            --apple-gray6: rgb(242, 242, 247);
+            
+            /* 深色模式颜色 */
+            --apple-dark-blue: rgb(10, 132, 255);
+            --apple-dark-green: rgb(48, 209, 88);
+            --apple-dark-indigo: rgb(94, 92, 230);
+            --apple-dark-orange: rgb(255, 159, 10);
+            --apple-dark-pink: rgb(255, 55, 95);
+            --apple-dark-purple: rgb(191, 90, 242);
+            --apple-dark-red: rgb(255, 69, 58);
+            --apple-dark-teal: rgb(100, 210, 255);
+            --apple-dark-yellow: rgb(255, 214, 10);
+            --apple-dark-gray1: rgb(142, 142, 147);
+            --apple-dark-gray2: rgb(99, 99, 102);
+            --apple-dark-gray3: rgb(72, 72, 74);
+            --apple-dark-gray4: rgb(58, 58, 60);
+            --apple-dark-gray5: rgb(44, 44, 46);
+            --apple-dark-gray6: rgb(28, 28, 30);
+        }
+
+        /* 全局动画过渡 */
+        * {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         .card {
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            padding: 16px;
-            margin: 8px 0;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--apple-gray5);
+            padding: 20px;
+            margin: 12px 0;
             cursor: pointer;
-            transition: all 0.2s;
+            transform: translateY(0);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         .card:hover {
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
         .input-number {
             width: 80px;
             text-align: center;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 4px;
+            border: 1px solid var(--apple-gray4);
+            border-radius: 12px;
+            padding: 8px;
+            font-size: 16px;
+            background: white;
+            color: var(--apple-dark-gray2);
         }
+
+        .input-number:focus {
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+            outline: none;
+            background: white;
+        }
+
         .btn {
-            padding: 8px 16px;
-            border-radius: 4px;
+            padding: 10px 20px;
+            border-radius: 12px;
             border: none;
             cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-primary {
-            background: #1a73e8;
+            font-weight: 500;
+            background: var(--apple-blue);
             color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .btn-primary:hover {
-            background: #1557b0;
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
         }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
         .status-indicator {
             display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 6px 12px;
+            border-radius: 12px;
             font-size: 14px;
             margin-left: 12px;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            font-weight: 500;
         }
+
         .status-connecting {
-            background-color: #fff3cd;
-            color: #856404;
+            background: var(--apple-yellow);
+            color: #000;
         }
+
         .status-success {
-            background-color: #d4edda;
-            color: #155724;
+            background: var(--apple-green);
+            color: white;
         }
+
         .status-error {
-            background-color: #f8d7da;
-            color: #721c24;
+            background: var(--apple-red);
+            color: white;
         }
+
         .search-box {
             width: 100%;
             max-width: 500px;
-            padding: 8px 16px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
             margin-bottom: 20px;
+            background: var(--apple-gray6);
+            color: var(--apple-dark-gray2);
         }
+
+        .search-box:focus {
+            background: white;
+            border: 1px solid var(--apple-gray4);
+        }
+
         .search-results {
             position: absolute;
             top: 100%;
             left: 0;
             right: 0;
             background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05),
+                        0 4px 16px rgba(0, 0, 0, 0.03);
             max-height: 400px;
             overflow-y: auto;
             z-index: 1000;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        .nav-container {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 1px 0 var(--apple-gray5);
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--apple-dark-gray2);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            min-width: 280px;
+            max-width: 90%;
+            text-align: center;
+            z-index: 9999;
+            font-size: 1.1rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+
+        .notification.success {
+            background: var(--apple-green);
+        }
+
+        .notification.error {
+            background: var(--apple-red);
+        }
+
+        .history-panel {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--apple-gray5);
+        }
+
+        /* 动画关键帧 */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* 触觉反馈 */
+        @media (hover: hover) {
+            .btn:hover {
+                transform: translateY(-2px);
+            }
+            
+            .btn:active {
+                transform: scale(0.95);
+            }
+        }
+
+        /* 移动设备触觉反馈 */
+        @media (hover: none) {
+            .btn:active {
+                transform: scale(0.95);
+            }
+        }
+
+        .quantity-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            background: var(--apple-gray6);
+            color: var(--apple-blue);
+            border: none;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .quantity-btn:hover {
+            background: var(--apple-gray5);
+            transform: scale(1.05);
+        }
+
+        .quantity-btn:active {
+            transform: scale(0.95);
+        }
+
+        .submit-btn {
+            background: var(--apple-green);
+            color: white;
+            border-radius: 12px;
+            padding: 10px 24px;
+            font-weight: 500;
+            border: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.95);
+        }
+
+        .note-input {
+            border: 1px solid var(--apple-gray4);
+            border-radius: 12px;
+            padding: 10px;
+            background: white;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .note-input:focus {
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+            outline: none;
+        }
+
         .grid-cols-3-mobile {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -152,6 +387,11 @@
                 min-width: 80px;
                 height: 48px;
                 font-size: 1.1rem;
+                background: white;
+                border: 1px solid var(--apple-gray4);
+                border-radius: 12px;
+                padding: 8px;
+                color: var(--apple-dark-gray2);
             }
             .input-number {
                 height: 48px;
@@ -349,18 +589,22 @@
 
         .product-name {
             font-size: 1rem;
-            font-weight: 500;
-            color: #374151;
+            font-weight: 600;
+            color: #333;
             margin-bottom: 0.5rem;
         }
         
         .product-spec {
             font-size: 1.1rem;
-            font-weight: 600;
-            color: #1f2937;
+            font-weight: 500;
+            color: #666;
             padding: 0.25rem 0;
         }
         
+        .product-code {
+            color: #999;
+        }
+
         .product-location {
             font-size: 0.875rem;
             color: #6b7280;
@@ -407,8 +651,8 @@
 
         .product-spec {
             font-size: 1.1rem;
-            font-weight: 600;
-            color: #1f2937;
+            font-weight: 500;
+            color: #666;
             padding: 0.25rem 0;
         }
 
@@ -459,7 +703,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #666;
+            color: var(--apple-blue);
         }
 
         .nav-btn svg {
@@ -467,14 +711,14 @@
             height: 24px;
         }
 
+        .nav-btn:hover {
+            background: var(--apple-gray6);
+        }
+
         .location-title {
             font-size: 1.1rem;
-            font-weight: 500;
-            color: #333;
-            margin-right: auto;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-weight: 600;
+            color: var(--apple-dark-gray2);
         }
 
         .submit-btn {
@@ -588,7 +832,7 @@
             z-index: 9999;
             font-size: 1.1rem;
             font-weight: 500;
-            backdrop-filter: blur(8px);
+            backdrop-filter: none;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
@@ -673,8 +917,8 @@
 
         .product-spec {
             font-size: 1.1rem;
-            font-weight: 600;
-            color: #1f2937;
+            font-weight: 500;
+            color: #666;
             padding: 0.25rem 0;
         }
 
@@ -729,7 +973,7 @@
             position: absolute;
             top: -8px;
             right: -8px;
-            background-color: #f44336;
+            background-color: var(--apple-red);
             color: white;
             border-radius: 12px;
             padding: 2px 6px;
@@ -764,12 +1008,13 @@
 
         .history-header {
             padding: 16px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e5e7eb;
+            background: var(--apple-gray6);
+            border-bottom: 1px solid var(--apple-gray5);
             font-weight: 500;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: var(--apple-dark-gray2);
         }
 
         .history-content {
@@ -790,7 +1035,7 @@
 
         .history-time {
             font-size: 0.8rem;
-            color: #6b7280;
+            color: var(--apple-gray1);
             margin-bottom: 4px;
         }
 
@@ -800,20 +1045,20 @@
         }
 
         .history-specs {
-            color: #4b5563;
+            color: var(--apple-dark-gray1);
             white-space: pre-line;
             margin-bottom: 4px;
         }
 
         .history-note {
-            color: #6b7280;
+            color: var(--apple-gray1);
             font-style: italic;
         }
 
         .clear-history {
             background: none;
             border: none;
-            color: #dc2626;
+            color: var(--apple-red);
             font-size: 0.9rem;
             cursor: pointer;
             padding: 4px 8px;
@@ -821,7 +1066,7 @@
         }
 
         .clear-history:hover {
-            background: #fee2e2;
+            background: rgba(255, 59, 48, 0.1);
         }
     </style>
 </head>
