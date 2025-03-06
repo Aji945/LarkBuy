@@ -1068,6 +1068,44 @@
         .clear-history:hover {
             background: rgba(255, 59, 48, 0.1);
         }
+
+        @media (min-width: 769px) {
+            .controls-container {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 1rem;
+                width: 100%;
+            }
+            
+            .controls-row {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                width: auto;
+            }
+            
+            .quantity-controls {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                width: auto;
+            }
+            
+            .unit-input {
+                width: 100px;
+                min-width: 80px;
+            }
+            
+            .input-number {
+                width: 80px;
+                min-width: 60px;
+            }
+            
+            .product-location {
+                margin-left: auto;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -1306,7 +1344,7 @@
             document.getElementById('products-list').classList.add('hidden');
             currentSection = '';
             currentSubSection = '';
-            updateHeaderLocation('庫存採購系統');
+            updateHeaderLocation('LARK快捷採購');
         }
 
         function showSubSections(section) {
