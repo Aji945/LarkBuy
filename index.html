@@ -1761,9 +1761,12 @@
 
         // 提交整個商品組
         async function submitProductGroup(productName, withNote = false) {
-            const products = productsData.filter(p => p.name === productName && p.quantity > 0);
+            // 不再過濾數量大於0的項目，而是獲取所有該名稱的產品
+            const products = productsData.filter(p => p.name === productName);
+            
+            // 如果完全沒有找到商品，顯示錯誤並返回
             if (products.length === 0) {
-                showNotification('請先選擇採購數量！', 'error');
+                showNotification('無法找到此商品！', 'error');
                 return;
             }
 
