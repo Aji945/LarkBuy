@@ -1971,6 +1971,7 @@
                 
                 if (product.quantity === 0 && delta < 0) {
                     // 當數量為0且點擊"-"號時顯示"無庫存"
+                    product.quantity = 0; // 確保數量保持為0
                     product.outOfStock = true;
                     // 不重新加載頁面，只更新數量顯示
                     const input = document.querySelector(`input[onchange="setQuantity('${productId}', this.value)"]`);
