@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lark快捷採購 v2.0</title>
+    <title>Lark快捷採購 v2.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -1672,10 +1672,13 @@
 
         // 修改商品組卡片生成函數
         function generateProductGroupCard(productName, products, bgClass = '', shownRelatedProducts = new Set()) {
-            // 在函數開始時，確保每個產品都有正確的outOfStock屬性
+            // 在函數開始時，確保每個產品都有正確的數量和outOfStock屬性
             products.forEach(product => {
                 if (product.outOfStock === undefined) {
                     product.outOfStock = false;
+                }
+                if (product.quantity === undefined || product.quantity === null) {
+                    product.quantity = 0;
                 }
             });
             
@@ -1693,10 +1696,13 @@
                 !currentPageProducts.has(p.location)
             ).sort((a, b) => a.spec.localeCompare(b.spec, 'zh-TW')) : [];
 
-            // 確保相關產品也有outOfStock屬性
+            // 確保相關產品也有outOfStock屬性和數量
             relatedProducts.forEach(product => {
                 if (product.outOfStock === undefined) {
                     product.outOfStock = false;
+                }
+                if (product.quantity === undefined || product.quantity === null) {
+                    product.quantity = 0;
                 }
             });
 
@@ -2001,9 +2007,16 @@
             const input = document.querySelector(`input[onchange="setQuantity('${productId}', this.value)"]`);
             if (!input) return;
             
-            if (product.quantity === 0 && delta < 0) {
+            // 如果目前輸入框是空白的，先設為0
+            if (input.value === "") {
+                input.value = "0";
+                product.quantity = 0;
+            }
+            
+            if ((product.quantity === 0 || product.quantity === null || product.quantity === undefined || input.value === "" || input.value === "0") && delta < 0) {
                 // 當數量為0且點擊"-"號時直接顯示"無庫存"
                 product.outOfStock = true;
+                product.quantity = 0;
                 
                 input.value = "無庫存";
                 input.setAttribute("type", "text");
@@ -2021,9 +2034,10 @@
             } else {
                 // 一般數量增減處理
                 product.outOfStock = false;
-                product.quantity = Math.max(0, (product.quantity || 0) + delta);
+                const newQuantity = Math.max(0, (parseInt(product.quantity) || 0) + delta);
+                product.quantity = newQuantity;
                 
-                input.value = product.quantity.toString();
+                input.value = newQuantity.toString();
                 input.setAttribute("type", "number");
                 input.dataset.outOfStock = "false";
                 input.classList.remove("out-of-stock");
@@ -2047,8 +2061,8 @@
                 input.setAttribute("type", "text");
                 input.dataset.outOfStock = "true";
                 input.classList.add("out-of-stock");
-            } else if (!value || value === "" || isNaN(parseInt(value))) {
-                // 空值處理為0
+            } else if (!value || value === "" || value === undefined || value === null || isNaN(parseInt(value))) {
+                // 嚴格處理空值為0
                 product.outOfStock = false;
                 product.quantity = 0;
                 
