@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lark快捷採購 v2.0</title>
+    <title>Lark快捷採購</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -1158,8 +1158,21 @@
 
         .input-number.out-of-stock {
             color: #E53E3E;
-            font-weight: 500;
+            font-weight: 700; /* 加粗字體 */
             background-color: #FFF5F5;
+            border: 1px solid #FC8181; /* 紅色邊框 */
+            text-align: center;
+            font-size: 0.95rem;
+        }
+        
+        @media (max-width: 768px) {
+            .input-number.out-of-stock {
+                font-size: 1.05rem;
+                height: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -1658,6 +1671,13 @@
 
         // 修改商品組卡片生成函數
         function generateProductGroupCard(productName, products, bgClass = '', shownRelatedProducts = new Set()) {
+            // 在函數開始時，確保每個產品都有正確的outOfStock屬性
+            products.forEach(product => {
+                if (product.outOfStock === undefined) {
+                    product.outOfStock = false;
+                }
+            });
+            
             // 按規格排序商品
             products.sort((a, b) => a.spec.localeCompare(b.spec, 'zh-TW'));
             
@@ -1671,6 +1691,13 @@
                 p.name === productName && 
                 !currentPageProducts.has(p.location)
             ).sort((a, b) => a.spec.localeCompare(b.spec, 'zh-TW')) : [];
+
+            // 確保相關產品也有outOfStock屬性
+            relatedProducts.forEach(product => {
+                if (product.outOfStock === undefined) {
+                    product.outOfStock = false;
+                }
+            });
 
             // 判断是否需要折叠（只有当商品有多个规格或有相关商品时才需要）
             const needCollapse = products.length > 1 || relatedProducts.length > 0;
@@ -1967,11 +1994,9 @@
         function updateQuantity(productId, delta) {
             const product = productsData.find(p => p.id === productId);
             if (product) {
-                const newQuantity = product.quantity + delta;
-                
+                // 檢查是否是0按減號的情況
                 if (product.quantity === 0 && delta < 0) {
-                    // 當數量為0且點擊"-"號時顯示"無庫存"
-                    product.quantity = 0; // 確保數量保持為0
+                    // 當數量為0且點擊"-"號時立即顯示"無庫存"
                     product.outOfStock = true;
                     // 不重新加載頁面，只更新數量顯示
                     const input = document.querySelector(`input[onchange="setQuantity('${productId}', this.value)"]`);
@@ -1981,18 +2006,20 @@
                         input.type = "text"; // 切換為文本輸入
                         input.classList.add("out-of-stock"); // 添加樣式
                     }
-                } else {
-                    // 其他情況正常處理
-                    product.quantity = Math.max(0, newQuantity);
-                    product.outOfStock = false;
-                    // 不重新加載頁面，只更新數量
-                    const input = document.querySelector(`input[onchange="setQuantity('${productId}', this.value)"]`);
-                    if (input) {
-                        input.value = product.quantity;
-                        input.dataset.outOfStock = "false";
-                        input.type = "number"; // 確保是數字輸入
-                        input.classList.remove("out-of-stock"); // 移除樣式
-                    }
+                    return; // 直接返回，避免進入下面的邏輯
+                } 
+                
+                // 其他情況正常處理
+                const newQuantity = product.quantity + delta;
+                product.quantity = Math.max(0, newQuantity);
+                product.outOfStock = false;
+                // 不重新加載頁面，只更新數量
+                const input = document.querySelector(`input[onchange="setQuantity('${productId}', this.value)"]`);
+                if (input) {
+                    input.value = product.quantity;
+                    input.dataset.outOfStock = "false";
+                    input.type = "number"; // 確保是數字輸入
+                    input.classList.remove("out-of-stock"); // 移除樣式
                 }
             }
         }
