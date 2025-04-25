@@ -1155,6 +1155,12 @@
         max-width: 160px;  /* 超小螢幕最大寬度 */
     }
 }
+
+        .input-number.out-of-stock {
+            color: #E53E3E;
+            font-weight: 500;
+            background-color: #FFF5F5;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -1694,8 +1700,9 @@
                                     <div class="controls-row">
                                         <div class="quantity-controls">
                                             <button class="quantity-btn" onclick="updateQuantity('${product.id}', -1)">-</button>
-                                            <input type="number" class="input-number" value="${product.quantity}" 
-                                                   onchange="setQuantity('${product.id}', this.value)" min="0">
+                                            <input type="${product.outOfStock ? 'text' : 'number'}" class="input-number" value="${product.outOfStock ? '無庫存' : product.quantity}" 
+                                                   onchange="setQuantity('${product.id}', this.value)" min="0"
+                                                   ${product.outOfStock ? 'data-out-of-stock="true"' : 'data-out-of-stock="false"'}>
                                             <button class="quantity-btn" onclick="updateQuantity('${product.id}', 1)">+</button>
                                         </div>
                                         <input type="text" class="input-number unit-input" value="" 
@@ -1716,8 +1723,9 @@
                                             <div class="controls-row">
                                                 <div class="quantity-controls">
                                                     <button class="quantity-btn" onclick="updateQuantity('${product.id}', -1)">-</button>
-                                                    <input type="number" class="input-number" value="${product.quantity}" 
-                                                           onchange="setQuantity('${product.id}', this.value)" min="0">
+                                                    <input type="${product.outOfStock ? 'text' : 'number'}" class="input-number" value="${product.outOfStock ? '無庫存' : product.quantity}" 
+                                                           onchange="setQuantity('${product.id}', this.value)" min="0"
+                                                           ${product.outOfStock ? 'data-out-of-stock="true"' : 'data-out-of-stock="false"'}>
                                                     <button class="quantity-btn" onclick="updateQuantity('${product.id}', 1)">+</button>
                                                 </div>
                                                 <input type="text" class="input-number unit-input" value="" 
@@ -1761,12 +1769,13 @@
 
         // 提交整個商品組
         async function submitProductGroup(productName, withNote = false) {
-            // 不再過濾數量大於0的項目，而是獲取所有該名稱的產品
-            const products = productsData.filter(p => p.name === productName);
+            // 篩選有數量的商品和標記為無庫存的商品
+            const products = productsData.filter(p => 
+                p.name === productName && (p.quantity > 0 || p.outOfStock === true)
+            );
             
-            // 如果完全沒有找到商品，顯示錯誤並返回
             if (products.length === 0) {
-                showNotification('無法找到此商品！', 'error');
+                showNotification('請先選擇採購數量！', 'error');
                 return;
             }
 
@@ -1792,6 +1801,11 @@
                 .map(product => {
                     let specText = product.spec.trim();
                     let codeText = product.code ? product.code.trim() : '';
+                    
+                    // 處理無庫存情況
+                    if (product.outOfStock === true) {
+                        return codeText ? `${specText}*無庫存 ${codeText}` : `${specText}*無庫存`;
+                    }
                     
                     if (!specText || specText === '無規格型號' || specText === '(無規格型號)' || /^\s*$/.test(specText)) {
                         return codeText ? `${product.quantity} ${codeText}` : `${product.quantity}`;
@@ -1846,6 +1860,7 @@
                     const quantityInputs = card.querySelectorAll('input[type="number"]');
                     quantityInputs.forEach(input => {
                         input.value = '0';
+                        input.dataset.outOfStock = "false";
                     });
 
                     // 清除單位
@@ -1865,6 +1880,7 @@
                 productsData.forEach(product => {
                     if (product.name === productName) {
                         product.quantity = 0;
+                        product.outOfStock = false;
                         product.code = '';
                         product.note = '';
                     }
@@ -1951,11 +1967,31 @@
         function updateQuantity(productId, delta) {
             const product = productsData.find(p => p.id === productId);
             if (product) {
-                product.quantity = Math.max(0, product.quantity + delta);
-                // 不重新加載頁面，只更新數量
-                const input = document.querySelector(`input[onchange="setQuantity('${productId}', this.value)"]`);
-                if (input) {
-                    input.value = product.quantity;
+                const newQuantity = product.quantity + delta;
+                if (product.quantity > 0 && newQuantity === 0 && delta < 0) {
+                    // 當數量從 > 0 變為 0 時顯示"無庫存"
+                    product.quantity = 0;
+                    product.outOfStock = true;
+                    // 不重新加載頁面，只更新數量顯示
+                    const input = document.querySelector(`input[onchange="setQuantity('${productId}', this.value)"]`);
+                    if (input) {
+                        input.value = "無庫存";
+                        input.dataset.outOfStock = "true";
+                        input.type = "text"; // 切換為文本輸入
+                        input.classList.add("out-of-stock"); // 添加樣式
+                    }
+                } else {
+                    // 其他情況正常處理
+                    product.quantity = Math.max(0, newQuantity);
+                    product.outOfStock = false;
+                    // 不重新加載頁面，只更新數量
+                    const input = document.querySelector(`input[onchange="setQuantity('${productId}', this.value)"]`);
+                    if (input) {
+                        input.value = product.quantity;
+                        input.dataset.outOfStock = "false";
+                        input.type = "number"; // 確保是數字輸入
+                        input.classList.remove("out-of-stock"); // 移除樣式
+                    }
                 }
             }
         }
@@ -1964,11 +2000,28 @@
         function setQuantity(productId, value) {
             const product = productsData.find(p => p.id === productId);
             if (product) {
-                product.quantity = Math.max(0, parseInt(value) || 0);
-                // 不重新加載頁面，只更新數量
-                const input = document.querySelector(`input[onchange="setQuantity('${productId}', this.value)"]`);
-                if (input) {
-                    input.value = product.quantity;
+                if (value === "無庫存") {
+                    // 如果輸入是"無庫存"
+                    product.quantity = 0;
+                    product.outOfStock = true;
+                    // 更新輸入欄位樣式
+                    const input = document.querySelector(`input[onchange="setQuantity('${productId}', this.value)"]`);
+                    if (input) {
+                        input.type = "text";
+                        input.classList.add("out-of-stock");
+                    }
+                } else {
+                    // 如果是數字
+                    product.quantity = Math.max(0, parseInt(value) || 0);
+                    product.outOfStock = false;
+                    // 不重新加載頁面，只更新數量
+                    const input = document.querySelector(`input[onchange="setQuantity('${productId}', this.value)"]`);
+                    if (input) {
+                        input.value = product.quantity;
+                        input.dataset.outOfStock = "false";
+                        input.type = "number";
+                        input.classList.remove("out-of-stock");
+                    }
                 }
             }
         }
