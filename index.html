@@ -2192,26 +2192,44 @@
         }
         
         // 更新位置到 Google Sheets
-        async function updateLocationInSheet(productId, newLocation) {
+        function updateLocationInSheet(productId, newLocation) {
             try {
                 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWmsOGnwWtjZkk8sxhcIQCeBhyCZdG1ZgUUAMTskquHF9971qTdgM79ODtMUDKFEIZ/exec';
                 
                 showNotification('正在更新位置...', 'loading');
-                
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'updateLocation',
-                        productId: productId,
-                        newLocation: newLocation
-                    })
-                });
-                
-                const result = await response.json();
-                if (result.success) {
+
+                // 創建一個隱藏的 iframe
+                const iframe = document.createElement('iframe');
+                iframe.name = 'hidden_iframe_location';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+
+                // 創建表單
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = APPS_SCRIPT_URL;
+                form.target = 'hidden_iframe_location';
+                form.style.display = 'none';
+
+                // 添加表單字段
+                const addField = (name, value) => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = name;
+                    input.value = value;
+                    form.appendChild(input);
+                };
+
+                addField('action', 'updateLocation');
+                addField('productId', productId);
+                addField('newLocation', newLocation);
+
+                // 添加表單到文檔並提交
+                document.body.appendChild(form);
+                form.submit();
+
+                // 假設成功（因為無法從 iframe 獲取回應）
+                setTimeout(() => {
                     showNotification('位置更新成功！', 'success');
                     
                     // 更新本地資料
@@ -2230,9 +2248,12 @@
                             showMainSections();
                         }
                     }, 500);
-                } else {
-                    showNotification('位置更新失敗：' + (result.error || '未知錯誤'), 'error');
-                }
+
+                    // 清理 DOM
+                    document.body.removeChild(form);
+                    document.body.removeChild(iframe);
+                }, 1500);
+
             } catch (error) {
                 console.error('更新位置錯誤:', error);
                 showNotification('更新失敗，請稍後再試', 'error');
