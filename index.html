@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lark快捷採購 v2.0</title>
+    <title>Lark快捷採購 v2.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -2231,7 +2231,10 @@
                          onclick="navigateToProduct(\`${product.location}\`, \`${product.name.replace(/['"\\]/g, '\\$&')}\`, \`${product.spec.replace(/['"\\]/g, '\\$&')}\`)">
                         <div class="font-medium">${product.name}</div>
                         <div class="text-sm text-gray-600">${product.spec}</div>
-                        <div class="text-xs text-gray-500">位置: ${product.location}</div>
+                        <div class="text-xs text-gray-500 flex items-center gap-2">
+                            ${product.unit ? `<span class="bg-gray-100 px-2 py-1 rounded">貨號: ${product.unit}</span>` : ''}
+                            <span>位置: ${product.location}</span>
+                        </div>
                     </div>
                 `).join('');
                 
