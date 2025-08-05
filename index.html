@@ -613,6 +613,19 @@
             border-radius: 4px;
             display: inline-block;
             margin-left: auto;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .product-location:hover {
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+        
+        .product-location.editing {
+            background-color: #fff;
+            border: 1px solid var(--apple-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
         }
         
         .spec-group {
@@ -664,6 +677,19 @@
             border-radius: 4px;
             display: inline-block;
             margin-left: auto;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .product-location:hover {
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+        
+        .product-location.editing {
+            background-color: #fff;
+            border: 1px solid var(--apple-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
         }
 
         .nav-container {
@@ -941,6 +967,19 @@
             border-radius: 4px;
             display: inline-block;
             margin-left: auto;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .product-location:hover {
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+        
+        .product-location.editing {
+            background-color: #fff;
+            border: 1px solid var(--apple-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
         }
 
         .note-input {
@@ -1709,7 +1748,7 @@
                                                onchange="setProductCode('${product.id}', this.value)" 
                                                placeholder="單位">
                                     </div>
-                                    <div class="product-location">位置: ${product.location}</div>
+                                    <div class="product-location" onclick="editLocation('${product.id}', '${product.location}', event)" title="點擊編輯位置">位置: ${product.location}</div>
                                 </div>
                             </div>
                         `).join('')}
@@ -1732,7 +1771,7 @@
                                                        onchange="setProductCode('${product.id}', this.value)" 
                                                        placeholder="單位">
                                             </div>
-                                            <div class="product-location">位置: ${product.location}</div>
+                                            <div class="product-location" onclick="editLocation('${product.id}', '${product.location}', event)" title="點擊編輯位置">位置: ${product.location}</div>
                                         </div>
                                     </div>
                                 `).join('')}
@@ -2141,6 +2180,64 @@
 
         // 頁面加載時獲取數據
         loadSheetData();
+        
+        // 編輯位置功能
+        function editLocation(productId, currentLocation, event) {
+            event.stopPropagation(); // 防止觸發商品卡片的點擊事件
+            
+            const newLocation = prompt('請輸入新的位置：', currentLocation);
+            if (newLocation && newLocation !== currentLocation) {
+                updateLocationInSheet(productId, newLocation);
+            }
+        }
+        
+        // 更新位置到 Google Sheets
+        async function updateLocationInSheet(productId, newLocation) {
+            try {
+                const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWmsOGnwWtjZkk8sxhcIQCeBhyCZdG1ZgUUAMTskquHF9971qTdgM79ODtMUDKFEIZ/exec';
+                
+                showNotification('正在更新位置...', 'loading');
+                
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'updateLocation',
+                        productId: productId,
+                        newLocation: newLocation
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showNotification('位置更新成功！', 'success');
+                    
+                    // 更新本地資料
+                    const product = productsData.find(p => p.id === productId);
+                    if (product) {
+                        product.location = newLocation;
+                    }
+                    
+                    // 重新載入當前頁面內容
+                    setTimeout(() => {
+                        if (currentSubSection) {
+                            showProducts(currentSubSection, currentSection === currentSubSection);
+                        } else if (currentSection) {
+                            showSubSections(currentSection);
+                        } else {
+                            showMainSections();
+                        }
+                    }, 500);
+                } else {
+                    showNotification('位置更新失敗：' + (result.error || '未知錯誤'), 'error');
+                }
+            } catch (error) {
+                console.error('更新位置錯誤:', error);
+                showNotification('更新失敗，請稍後再試', 'error');
+            }
+        }
 
         function setProductNote(productNameId, value) {
             const products = productsData.filter(p => {
