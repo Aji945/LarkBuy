@@ -601,8 +601,20 @@
             padding: 0.25rem 0;
         }
         
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+        
         .product-code {
-            color: #999;
+            font-size: 0.875rem;
+            color: #6b7280;
+            padding: 0.25rem 0.5rem;
+            background-color: #f9fafb;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
         }
 
         .product-location {
@@ -615,17 +627,51 @@
             margin-left: auto;
             cursor: pointer;
             transition: all 0.2s;
+            border: 1px solid transparent;
+            position: relative;
+        }
+        
+        .product-location::before {
+            content: "📝";
+            font-size: 0.7rem;
+            opacity: 0;
+            margin-right: 4px;
+            transition: opacity 0.2s;
         }
         
         .product-location:hover {
-            background-color: #e5e7eb;
-            color: #4b5563;
+            background-color: #dbeafe;
+            color: #3b82f6;
+            border-color: #93c5fd;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .product-location:hover::before {
+            opacity: 1;
         }
         
         .product-location.editing {
-            background-color: #fff;
+            background-color: #dbeafe;
             border: 1px solid var(--apple-blue);
             box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+            color: #1d4ed8;
+        }
+        
+        .product-location.editing::before {
+            content: "✏️";
+            opacity: 1;
+        }
+        
+        .product-code {
+            font-size: 0.875rem;
+            color: #6b7280;
+            padding: 0.25rem 0.5rem;
+            background-color: #f9fafb;
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 0.5rem;
+            border: 1px solid #e5e7eb;
         }
         
         .spec-group {
@@ -679,17 +725,51 @@
             margin-left: auto;
             cursor: pointer;
             transition: all 0.2s;
+            border: 1px solid transparent;
+            position: relative;
+        }
+        
+        .product-location::before {
+            content: "📝";
+            font-size: 0.7rem;
+            opacity: 0;
+            margin-right: 4px;
+            transition: opacity 0.2s;
         }
         
         .product-location:hover {
-            background-color: #e5e7eb;
-            color: #4b5563;
+            background-color: #dbeafe;
+            color: #3b82f6;
+            border-color: #93c5fd;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .product-location:hover::before {
+            opacity: 1;
         }
         
         .product-location.editing {
-            background-color: #fff;
+            background-color: #dbeafe;
             border: 1px solid var(--apple-blue);
             box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+            color: #1d4ed8;
+        }
+        
+        .product-location.editing::before {
+            content: "✏️";
+            opacity: 1;
+        }
+        
+        .product-code {
+            font-size: 0.875rem;
+            color: #6b7280;
+            padding: 0.25rem 0.5rem;
+            background-color: #f9fafb;
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 0.5rem;
+            border: 1px solid #e5e7eb;
         }
 
         .nav-container {
@@ -969,17 +1049,51 @@
             margin-left: auto;
             cursor: pointer;
             transition: all 0.2s;
+            border: 1px solid transparent;
+            position: relative;
+        }
+        
+        .product-location::before {
+            content: "📝";
+            font-size: 0.7rem;
+            opacity: 0;
+            margin-right: 4px;
+            transition: opacity 0.2s;
         }
         
         .product-location:hover {
-            background-color: #e5e7eb;
-            color: #4b5563;
+            background-color: #dbeafe;
+            color: #3b82f6;
+            border-color: #93c5fd;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .product-location:hover::before {
+            opacity: 1;
         }
         
         .product-location.editing {
-            background-color: #fff;
+            background-color: #dbeafe;
             border: 1px solid var(--apple-blue);
             box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+            color: #1d4ed8;
+        }
+        
+        .product-location.editing::before {
+            content: "✏️";
+            opacity: 1;
+        }
+        
+        .product-code {
+            font-size: 0.875rem;
+            color: #6b7280;
+            padding: 0.25rem 0.5rem;
+            background-color: #f9fafb;
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 0.5rem;
+            border: 1px solid #e5e7eb;
         }
 
         .note-input {
@@ -1355,6 +1469,7 @@
                             spec: spec,
                             code: '',  // 初始值設為空字串
                             cost: row[4] || '',
+                            unit: (row[5] || '').trim(),  // F欄位 - 單位
                             location: location,
                             quantity: 0
                         });
@@ -1511,6 +1626,10 @@
         }
 
         function showProducts(section, isDirectSection = false) {
+            // 儲存當前顯示狀態，用於重新渲染
+            window.currentSection = section;
+            window.isDirectSection = isDirectSection;
+            
             navigationHistory.push({ 
                 type: isDirectSection ? 'main' : 'sub', 
                 section: currentSection,
@@ -1748,7 +1867,10 @@
                                                onchange="setProductCode('${product.id}', this.value)" 
                                                placeholder="單位">
                                     </div>
-                                    <div class="product-location" onclick="editLocation('${product.name}|${product.spec}', '${product.location}', event)" title="點擊編輯位置">位置: ${product.location}</div>
+                                    <div class="product-info">
+                                        ${product.unit ? `<div class="product-code">貨號: ${product.unit}</div>` : ''}
+                                        <div class="product-location" onclick="editLocation('${product.name}|${product.spec}', '${product.location}', event)" title="點擊編輯位置">位置: ${product.location}</div>
+                                    </div>
                                 </div>
                             </div>
                         `).join('')}
@@ -1771,7 +1893,10 @@
                                                        onchange="setProductCode('${product.id}', this.value)" 
                                                        placeholder="單位">
                                             </div>
-                                            <div class="product-location" onclick="editLocation('${product.name}|${product.spec}', '${product.location}', event)" title="點擊編輯位置">位置: ${product.location}</div>
+                                            <div class="product-info">
+                                        ${product.unit ? `<div class="product-code">貨號: ${product.unit}</div>` : ''}
+                                        <div class="product-location" onclick="editLocation('${product.name}|${product.spec}', '${product.location}', event)" title="點擊編輯位置">位置: ${product.location}</div>
+                                    </div>
                                         </div>
                                     </div>
                                 `).join('')}
@@ -2187,9 +2312,9 @@
             
             const newLocation = prompt('請輸入新的位置：', currentLocation);
             if (newLocation && newLocation !== currentLocation) {
-                // 立即更新點擊的元素顯示
+                // 立即更新點擊的元素顯示和樣式
                 event.target.textContent = `位置: ${newLocation}`;
-                event.target.style.backgroundColor = '#dbeafe'; // 藍色背景表示正在更新
+                event.target.classList.add('editing');
                 
                 updateLocationInSheet(productId, newLocation, event.target);
             }
@@ -2242,13 +2367,10 @@
                     product.location = newLocation;
                 }
                 
-                // 立即更新畫面中的位置顯示
-                const locationElements = document.querySelectorAll('.product-location');
-                locationElements.forEach(element => {
-                    if (element.onclick && element.onclick.toString().includes(productId.replace(/['"\\]/g, '\\$&'))) {
-                        element.textContent = `位置: ${newLocation}`;
-                    }
-                });
+                // 立即更新畫面中的位置顯示 - 重新渲染當前頁面
+                if (window.currentSection) {
+                    showProducts(window.currentSection, window.isDirectSection);
+                }
                 
                 // 快速回饋給用戶
                 setTimeout(() => {
