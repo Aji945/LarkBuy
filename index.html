@@ -2316,8 +2316,21 @@
         function editLocation(productId, currentLocation, event) {
             event.stopPropagation(); // 防止觸發商品卡片的點擊事件
             
-            const newLocation = prompt('請輸入新的位置：', currentLocation);
-            if (newLocation && newLocation !== currentLocation) {
+            // 檢查是否正在更新中
+            if (event.target.classList.contains('editing')) {
+                showNotification('正在更新中，請稍候...', 'loading');
+                return;
+            }
+            
+            // 從資料中獲取最新的位置資訊
+            const product = productsData.find(p => {
+                const productKey = `${p.name}|${p.spec}`;
+                return productKey === productId;
+            });
+            const latestLocation = product ? product.location : currentLocation;
+            
+            const newLocation = prompt('請輸入新的位置：', latestLocation);
+            if (newLocation && newLocation !== latestLocation) {
                 // 添加編輯樣式，但不改變文字內容（文字更新交給 updateLocationInSheet 統一處理）
                 event.target.classList.add('editing');
                 
@@ -2385,10 +2398,13 @@
                 setTimeout(() => {
                     showNotification('位置更新成功！', 'success');
                     
-                    // 恢復點擊元素的原始樣式
-                    if (clickedElement) {
-                        clickedElement.style.backgroundColor = '#f3f4f6'; // 恢復原色
-                    }
+                    // 移除所有相同商品的編輯狀態
+                    document.querySelectorAll('.product-location').forEach(element => {
+                        const clickHandler = element.getAttribute('onclick');
+                        if (clickHandler && clickHandler.includes(productId.replace(/['"\\]/g, '\\$&'))) {
+                            element.classList.remove('editing');
+                        }
+                    });
                     
                     // 清理 DOM
                     if (document.body.contains(form)) document.body.removeChild(form);
@@ -2398,6 +2414,14 @@
             } catch (error) {
                 console.error('更新位置錯誤:', error);
                 showNotification('更新失敗，請稍後再試', 'error');
+                
+                // 發生錯誤時也要移除編輯狀態
+                document.querySelectorAll('.product-location').forEach(element => {
+                    const clickHandler = element.getAttribute('onclick');
+                    if (clickHandler && clickHandler.includes(productId.replace(/['"\\]/g, '\\$&'))) {
+                        element.classList.remove('editing');
+                    }
+                });
             }
         }
 
