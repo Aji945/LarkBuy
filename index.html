@@ -2318,8 +2318,7 @@
             
             const newLocation = prompt('請輸入新的位置：', currentLocation);
             if (newLocation && newLocation !== currentLocation) {
-                // 立即更新點擊的元素顯示和樣式
-                event.target.textContent = `位置: ${newLocation}`;
+                // 添加編輯樣式，但不改變文字內容（文字更新交給 updateLocationInSheet 統一處理）
                 event.target.classList.add('editing');
                 
                 updateLocationInSheet(productId, newLocation, event.target);
@@ -2373,11 +2372,12 @@
                     product.location = newLocation;
                 }
                 
-                // 立即更新畫面中的位置顯示 - 只更新該商品的位置，不重新渲染整個頁面
+                // 立即更新畫面中的位置顯示 - 更新所有相同商品的位置元素
                 document.querySelectorAll('.product-location').forEach(element => {
-                    const clickHandler = element.onclick;
-                    if (clickHandler && clickHandler.toString().includes(productId.replace(/['"\\]/g, '\\$&'))) {
-                        element.textContent = `位置: ${newLocation}`;
+                    const clickHandler = element.getAttribute('onclick');
+                    if (clickHandler && clickHandler.includes(productId.replace(/['"\\]/g, '\\$&'))) {
+                        // 保持原有的點擊事件，只更新顯示文字
+                        element.innerHTML = `位置: ${newLocation}`;
                     }
                 });
                 
