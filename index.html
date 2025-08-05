@@ -1748,7 +1748,7 @@
                                                onchange="setProductCode('${product.id}', this.value)" 
                                                placeholder="單位">
                                     </div>
-                                    <div class="product-location" onclick="editLocation('${product.id}', '${product.location}', event)" title="點擊編輯位置">位置: ${product.location}</div>
+                                    <div class="product-location" onclick="editLocation('${product.name}|${product.spec}', '${product.location}', event)" title="點擊編輯位置">位置: ${product.location}</div>
                                 </div>
                             </div>
                         `).join('')}
@@ -1771,7 +1771,7 @@
                                                        onchange="setProductCode('${product.id}', this.value)" 
                                                        placeholder="單位">
                                             </div>
-                                            <div class="product-location" onclick="editLocation('${product.id}', '${product.location}', event)" title="點擊編輯位置">位置: ${product.location}</div>
+                                            <div class="product-location" onclick="editLocation('${product.name}|${product.spec}', '${product.location}', event)" title="點擊編輯位置">位置: ${product.location}</div>
                                         </div>
                                     </div>
                                 `).join('')}
@@ -2185,8 +2185,11 @@
         function editLocation(productId, currentLocation, event) {
             event.stopPropagation(); // 防止觸發商品卡片的點擊事件
             
+            console.log('編輯位置:', {productId: productId, currentLocation: currentLocation});
+            
             const newLocation = prompt('請輸入新的位置：', currentLocation);
             if (newLocation && newLocation !== currentLocation) {
+                console.log('準備更新位置:', {productId: productId, newLocation: newLocation});
                 updateLocationInSheet(productId, newLocation);
             }
         }
